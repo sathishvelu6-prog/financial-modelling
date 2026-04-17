@@ -541,6 +541,14 @@ with tabs[8]:
         chart_mode = st.radio("View:", ["Indexed to 100","Actual NAV","% Return"],
                               horizontal=True, key='nav_cm')
 
+    # Define y_title before the loop so it's always available
+    if chart_mode == "Indexed to 100":
+        y_title = 'Indexed NAV (Base = 100)'
+    elif chart_mode == "Actual NAV":
+        y_title = 'NAV (₹)'
+    else:
+        y_title = 'Return (%)'
+
     if not sel_funds:
         st.warning("Select at least one fund above.")
     else:
@@ -580,13 +588,10 @@ with tabs[8]:
 
             if chart_mode == "Indexed to 100":
                 y = dff['NAV'] / first * 100
-                y_title = 'Indexed NAV (Base = 100)'
             elif chart_mode == "Actual NAV":
                 y = dff['NAV']
-                y_title = 'NAV (₹)'
             else:
                 y = (dff['NAV'] / first - 1) * 100
-                y_title = 'Return (%)'
 
             fig_n.add_trace(go.Scatter(
                 x=dff['Date'], y=y, name=fund,
