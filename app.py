@@ -205,7 +205,7 @@ with tabs[0]:
     st.markdown("")
     cl, cr = st.columns(2)
     with cl:
-        bar_c = ['#1E8449cc' if c >= 14.5 else '#C0392Bcc' for c in CAGRS]
+        bar_c = ['rgba(30,132,73,0.85)' if c >= 14.5 else 'rgba(192,57,43,0.85)' for c in CAGRS]
         fig = go.Figure(go.Bar(
             y=FUNDS, x=CAGRS, orientation='h', marker_color=bar_c,
             text=[f"{v:.2f}%" for v in CAGRS], textposition='outside'))
@@ -273,7 +273,7 @@ with tabs[2]:
     with c1:
         fig = go.Figure(go.Bar(
             x=FUNDS, y=STDS,
-            marker_color=['#C0392Bcc' if v>15 else '#E67E22cc' if v>10 else '#1E8449cc' for v in STDS],
+            marker_color=['rgba(192,57,43,0.85)' if v>15 else 'rgba(230,126,34,0.85)' if v>10 else 'rgba(30,132,73,0.85)' for v in STDS],
             text=[f'{v:.1f}%' for v in STDS], textposition='outside'))
         fig.update_layout(title='Standard Deviation (Annualised %)',
                           yaxis_title='Std Dev (%)', height=360,
@@ -283,7 +283,7 @@ with tabs[2]:
     with c2:
         fig2 = go.Figure(go.Bar(
             x=FUNDS, y=DDS,
-            marker_color=['#C0392Bcc' if v<-18 else '#E67E22cc' if v<-10 else '#1E8449cc' for v in DDS],
+            marker_color=['rgba(192,57,43,0.85)' if v<-18 else 'rgba(230,126,34,0.85)' if v<-10 else 'rgba(30,132,73,0.85)' for v in DDS],
             text=[f'{v:.2f}%' for v in DDS], textposition='outside'))
         fig2.update_layout(title='Maximum Drawdown (%)',
                            yaxis_title='Max DD (%)', height=360,
@@ -292,7 +292,7 @@ with tabs[2]:
 
     fig3 = go.Figure(go.Bar(
         x=FUNDS, y=VAR95,
-        marker_color=['#C0392Bcc' if v<-4 else '#E67E22cc' if v<-2 else '#1E8449cc' for v in VAR95],
+        marker_color=['rgba(192,57,43,0.85)' if v<-4 else 'rgba(230,126,34,0.85)' if v<-2 else 'rgba(30,132,73,0.85)' for v in VAR95],
         text=[f'{v:.2f}%' for v in VAR95], textposition='outside'))
     fig3.update_layout(title='Value-at-Risk 95% — Worst Expected Monthly Loss (1-in-20 months)',
                        yaxis_title='VaR 95% (%)', height=340,
@@ -334,7 +334,7 @@ with tabs[3]:
     alpha_vals = [ALPHAS[FUNDS.index(f)] for f in sorted_funds]
     fig2 = go.Figure(go.Bar(
         y=sorted_funds, x=alpha_vals, orientation='h',
-        marker_color=['#1E8449cc' if v>=0 else '#C0392Bcc' for v in alpha_vals],
+        marker_color=['rgba(30,132,73,0.85)' if v>=0 else 'rgba(192,57,43,0.85)' for v in alpha_vals],
         text=[f'+{v:.1f}%' if v>=0 else f'{v:.1f}%' for v in alpha_vals],
         textposition='outside'))
     fig2.add_vline(x=0, line_color='black', line_width=1)
