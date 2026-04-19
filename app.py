@@ -15,6 +15,33 @@ st.set_page_config(
 # ─── CSS ─────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+  /* ── Force light background everywhere ── */
+  .stApp,
+  [data-testid="stAppViewContainer"],
+  [data-testid="stMain"],
+  [data-testid="stMainBlockContainer"],
+  section[data-testid="stSidebar"],
+  [data-testid="stVerticalBlock"] {
+    background-color: #F4F7FB !important;
+    color: #3A4D63 !important;
+  }
+  /* Tab bar background */
+  [data-testid="stTabs"] { background-color: #F4F7FB !important; }
+  /* Tab labels */
+  button[data-baseweb="tab"] { color: #3A4D63 !important; }
+  button[data-baseweb="tab"][aria-selected="true"] { color: #0C3C6E !important; font-weight:700; }
+  /* Dataframe / table */
+  [data-testid="stDataFrame"] { background-color: white !important; }
+  /* Metrics */
+  [data-testid="metric-container"] { background:white; border-radius:10px; padding:10px;
+    border:1px solid #D8E4F0; }
+  [data-testid="stMetricValue"]{ color:#0C3C6E !important; }
+  /* General text */
+  p, span, label, div { color: #3A4D63; }
+  h1,h2,h3,h4 { color: #0C3C6E !important; }
+  /* Selectbox / multiselect */
+  [data-baseweb="select"] { background:white !important; }
+
   header[data-testid="stHeader"]{ display:none; }
   .block-container{ padding-top:0 !important; padding-bottom:1rem !important; }
   .banner{
