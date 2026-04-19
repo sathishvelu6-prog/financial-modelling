@@ -44,6 +44,19 @@ st.markdown("""
   .banner-center p  { color: rgba(255,255,255,0.85) !important; }
   /* Selectbox / multiselect */
   [data-baseweb="select"] { background:white !important; }
+  /* ── Force Plotly chart SVG text to black ── */
+  .js-plotly-plot .plotly svg text { fill: #111111 !important; }
+  .js-plotly-plot .plotly .g-gtitle text { fill: #0C3C6E !important; }
+  .js-plotly-plot .plotly .xtitle, .js-plotly-plot .plotly .ytitle { fill: #111111 !important; }
+  /* ── Fix dark selectbox / multiselect ── */
+  [data-testid="stSelectbox"] [data-baseweb="select"],
+  [data-testid="stMultiSelect"] [data-baseweb="select"],
+  [data-baseweb="select"] { background-color: white !important; }
+  [data-baseweb="select"] * { color: #1a1a1a !important; }
+  [data-baseweb="popover"] { background: white !important; }
+  [data-baseweb="menu"] { background: white !important; }
+  [data-baseweb="tag"] { background-color: #EEEDFE !important; }
+  [data-baseweb="tag"] span { color: #534AB7 !important; }
   /* ── Styled HTML table helper ── */
   .htbl { width:100%; border-collapse:collapse; font-family:'Segoe UI',Arial,sans-serif;
           font-size:13px; border-radius:10px; overflow:hidden;
@@ -53,7 +66,7 @@ st.markdown("""
                    font-weight:600; white-space:nowrap; }
   .htbl tbody tr:nth-child(even) { background:#F4F7FB; }
   .htbl tbody tr:nth-child(odd)  { background:white; }
-  .htbl tbody td { padding:8px 14px; color:#1a1a1a !important;
+  .htbl tbody td { padding:8px 14px; color:#1a1a1a;
                    border-bottom:1px solid #EEF2F7; }
 
   header[data-testid="stHeader"]{ display:none; }
@@ -457,8 +470,8 @@ with tabs[3]:
         tbl += f'<td style="padding:9px 14px;font-weight:600;color:#0C3C6E;">{row["Fund"]}</td>'
         tbl += f'<td style="padding:9px 14px;text-align:center;">{row["Sharpe"]:.2f}</td>'
         tbl += f'<td style="padding:9px 14px;text-align:center;">{row["Sortino"]:.2f}</td>'
-        tbl += f'<td style="padding:9px 14px;text-align:center;color:{ac};font-weight:600;">{as_}</td>'
-        tbl += f'<td style="padding:9px 14px;text-align:center;color:{sc};font-size:17px;">{row["Rating"]}</td>'
+        tbl += f'<td style="padding:9px 14px;text-align:center;"><span style="color:{ac};font-weight:600;">{as_}</span></td>'
+        tbl += f'<td style="padding:9px 14px;text-align:center;"><span style="color:{sc};font-size:18px;">{row["Rating"]}</span></td>'
         tbl += '</tr>'
     tbl += '</tbody></table>'
     st.markdown(tbl, unsafe_allow_html=True)
@@ -697,15 +710,15 @@ with tabs[7]:
         sc = STAR_COLORS_SC.get(rating.count('★'), '#888')
         bg = '#F4F7FB' if idx % 2 == 0 else 'white'
         sc_tbl += f'<tr style="background:{bg};">'
-        sc_tbl += f'<td style="padding:9px 14px;color:#1a1a1a;">{rank}</td>'
-        sc_tbl += f'<td style="padding:9px 14px;font-weight:600;color:#0C3C6E;">{fund}</td>'
-        sc_tbl += f'<td style="padding:9px 14px;text-align:center;font-weight:700;color:#0C3C6E;">{score}</td>'
-        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:#1a1a1a;">{cagr:.2f}%</td>'
-        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:#1a1a1a;">{sharpe:.2f}</td>'
         dd_c = '#E24B4A' if maxdd < -15 else '#E67E22' if maxdd < -9 else '#1D9E75'
-        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:{dd_c};font-weight:600;">{maxdd:.2f}%</td>'
-        sc_tbl += f'<td style="padding:9px 14px;color:#3A4D63;">{bestfor}</td>'
-        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:{sc};font-size:17px;">{rating}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;">{rank}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;"><span style="color:#0C3C6E;font-weight:600;">{fund}</span></td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;"><span style="color:#0C3C6E;font-weight:700;">{score}</span></td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;">{cagr:.2f}%</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;">{sharpe:.2f}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;"><span style="color:{dd_c};font-weight:600;">{maxdd:.2f}%</span></td>'
+        sc_tbl += f'<td style="padding:9px 14px;">{bestfor}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;"><span style="color:{sc};font-size:18px;">{rating}</span></td>'
         sc_tbl += '</tr>'
     sc_tbl += '</tbody></table>'
     st.markdown(f'<div style="overflow-x:auto;margin-bottom:8px;">{sc_tbl}</div>', unsafe_allow_html=True)
@@ -783,51 +796,82 @@ with tabs[8]:
             sdf = pd.DataFrame(summary_rows)
             st.markdown(html_table({c: list(sdf[c]) for c in sdf.columns}), unsafe_allow_html=True)
 
-        # ── Daily NAV Table with Indexed & % Return columns ──
+        # ── Daily NAV Table ──
         st.markdown("---")
         st.markdown("**📄 Daily NAV Data — Indexed to 100 · Actual NAV · % Return**")
         fund_view = st.selectbox("Fund to view daily data:", sel_funds, key='nav_fv')
         df_v = nav_raw.get(fund_view)
-        if df_v is not None:
+
+        if df_v is None:
+            # File not found — show path info
+            fpath = os.path.join(NAV_FOLDER, NAV_FILES.get(fund_view,''))
+            st.warning(f"⚠️ NAV file not found. Expected path:\n`{fpath}`\n\nPlease ensure the 06_NAV_Data folder is present.")
+        else:
             mask2 = (df_v['Date']>=pd.Timestamp(d_start)) & (df_v['Date']<=pd.Timestamp(d_end))
             df_show = df_v[mask2].copy().reset_index(drop=True)
 
-            if not df_show.empty:
+            if df_show.empty:
+                st.info("No data available for this fund in the selected date range.")
+            else:
                 base_nav = df_show['NAV'].iloc[0]
-                df_show['Indexed (Base=100)'] = (df_show['NAV'] / base_nav * 100).round(2)
-                df_show['Cumulative Return (%)'] = ((df_show['NAV'] / base_nav - 1) * 100).round(3)
+                df_show['Indexed'] = (df_show['NAV'] / base_nav * 100).round(2)
+                df_show['Cum Return (%)'] = ((df_show['NAV'] / base_nav - 1) * 100).round(3)
                 df_show['Daily Return (%)'] = df_show['NAV'].pct_change().mul(100).round(3)
-
-                # Format columns for display
-                df_display = pd.DataFrame()
-                df_display['Date']                = df_show['Date'].dt.strftime('%d-%b-%Y')
-                df_display['NAV (₹)']             = df_show['NAV'].apply(lambda x: f'₹{x:,.4f}')
-                df_display['Indexed (Base=100)']  = df_show['Indexed (Base=100)'].apply(lambda x: f'{x:.2f}')
-                df_display['Cumulative Return (%)'] = df_show['Cumulative Return (%)'].apply(
-                    lambda x: f'+{x:.3f}%' if x>0 else f'{x:.3f}%')
-                df_display['Daily Return (%)'] = df_show['Daily Return (%)'].apply(
-                    lambda x: f'+{x:.3f}%' if pd.notna(x) and x>0 else (
-                              f'{x:.3f}%'  if pd.notna(x) and x<0 else '—'))
 
                 col_tbl, col_stat = st.columns([3,1])
                 with col_tbl:
-                    st.dataframe(df_display, use_container_width=True, hide_index=True, height=440)
-                    st.caption(f"{len(df_display):,} trading days | {fund_view} | Base NAV: ₹{base_nav:,.4f}")
+                    # Build rows with color-coded returns
+                    rows_html = ''
+                    for i, row in df_show.iterrows():
+                        dr = row['Daily Return (%)']
+                        cr = row['Cum Return (%)']
+                        dr_str = f'+{dr:.3f}%' if pd.notna(dr) and dr>0 else (f'{dr:.3f}%' if pd.notna(dr) and dr<0 else '—')
+                        dr_c = '#1D9E75' if pd.notna(dr) and dr>0 else ('#E24B4A' if pd.notna(dr) and dr<0 else '#888')
+                        cr_str = f'+{cr:.2f}%' if cr>0 else f'{cr:.2f}%'
+                        cr_c = '#1D9E75' if cr>0 else '#E24B4A'
+                        bg = '#F4F7FB' if i%2==0 else 'white'
+                        rows_html += (
+                            f'<tr style="background:{bg};">'
+                            f'<td style="padding:6px 12px;">{row["Date"].strftime("%d-%b-%Y")}</td>'
+                            f'<td style="padding:6px 12px;">₹{row["NAV"]:,.4f}</td>'
+                            f'<td style="padding:6px 12px;">{row["Indexed"]:.2f}</td>'
+                            f'<td style="padding:6px 12px;"><span style="color:{cr_c};font-weight:600;">{cr_str}</span></td>'
+                            f'<td style="padding:6px 12px;"><span style="color:{dr_c};">{dr_str}</span></td>'
+                            f'</tr>'
+                        )
+                    nav_html = f'''
+                    <div style="overflow-y:auto;max-height:440px;border-radius:10px;
+                                border:1px solid #D8E4F0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                      <table style="width:100%;border-collapse:collapse;font-family:Segoe UI,Arial;font-size:13px;">
+                        <thead style="position:sticky;top:0;">
+                          <tr style="background:#0C3C6E;">
+                            <th style="padding:9px 12px;text-align:left;color:white;white-space:nowrap;">Date</th>
+                            <th style="padding:9px 12px;text-align:left;color:white;white-space:nowrap;">NAV (₹)</th>
+                            <th style="padding:9px 12px;text-align:left;color:white;white-space:nowrap;">Indexed (Base=100)</th>
+                            <th style="padding:9px 12px;text-align:left;color:white;white-space:nowrap;">Cumulative Return</th>
+                            <th style="padding:9px 12px;text-align:left;color:white;white-space:nowrap;">Daily Return</th>
+                          </tr>
+                        </thead>
+                        <tbody>{rows_html}</tbody>
+                      </table>
+                    </div>
+                    <p style="font-size:11px;color:#6B7F99;margin-top:4px;">
+                      {len(df_show):,} trading days | {fund_view} | Base NAV: ₹{base_nav:,.4f}
+                    </p>'''
+                    st.markdown(nav_html, unsafe_allow_html=True)
 
                 with col_stat:
                     nav_arr = df_show['NAV'].values
                     if len(nav_arr) > 1:
                         daily_rets = pd.Series(nav_arr).pct_change().dropna()
                         st.markdown("**📈 Quick Stats**")
-                        st.metric("Total Return",      f"+{(nav_arr[-1]/nav_arr[0]-1)*100:.2f}%")
-                        st.metric("Avg Daily Return",  f"{daily_rets.mean()*100:.3f}%")
-                        st.metric("Daily Std Dev",     f"{daily_rets.std()*100:.3f}%")
-                        st.metric("Best Day",          f"+{daily_rets.max()*100:.2f}%")
-                        st.metric("Worst Day",         f"{daily_rets.min()*100:.2f}%")
+                        st.metric("Total Return",     f"+{(nav_arr[-1]/nav_arr[0]-1)*100:.2f}%")
+                        st.metric("Avg Daily Return", f"{daily_rets.mean()*100:.3f}%")
+                        st.metric("Daily Std Dev",    f"{daily_rets.std()*100:.3f}%")
+                        st.metric("Best Day",         f"+{daily_rets.max()*100:.2f}%")
+                        st.metric("Worst Day",        f"{daily_rets.min()*100:.2f}%")
                         pos = (daily_rets > 0).sum()
-                        st.metric("Positive Days",     f"{pos} / {len(daily_rets)}")
-            else:
-                st.info("No data available for this fund in the selected date range.")
+                        st.metric("Positive Days",    f"{pos} / {len(daily_rets)}")
 
 # ─── Footer ───────────────────────────────────────────────────────────────────
 st.markdown("---")
