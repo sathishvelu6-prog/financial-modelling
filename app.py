@@ -23,24 +23,38 @@ st.markdown("""
   section[data-testid="stSidebar"],
   [data-testid="stVerticalBlock"] {
     background-color: #F4F7FB !important;
-    color: #3A4D63 !important;
+    color: #1a1a1a !important;
   }
   /* Tab bar background */
   [data-testid="stTabs"] { background-color: #F4F7FB !important; }
   /* Tab labels */
   button[data-baseweb="tab"] { color: #3A4D63 !important; }
   button[data-baseweb="tab"][aria-selected="true"] { color: #0C3C6E !important; font-weight:700; }
-  /* Dataframe / table */
-  [data-testid="stDataFrame"] { background-color: white !important; }
   /* Metrics */
   [data-testid="metric-container"] { background:white; border-radius:10px; padding:10px;
     border:1px solid #D8E4F0; }
   [data-testid="stMetricValue"]{ color:#0C3C6E !important; }
-  /* General text */
-  p, span, label, div { color: #3A4D63; }
-  h1,h2,h3,h4 { color: #0C3C6E !important; }
+  [data-testid="stMetricLabel"]{ color:#3A4D63 !important; }
+  /* General text — black for readability */
+  p, span, label { color: #1a1a1a; }
+  div { color: #1a1a1a; }
+  h2,h3,h4 { color: #0C3C6E !important; }
+  /* Banner title must stay white — override generic rules */
+  .banner-center h1 { color: white !important; }
+  .banner-center p  { color: rgba(255,255,255,0.85) !important; }
   /* Selectbox / multiselect */
   [data-baseweb="select"] { background:white !important; }
+  /* ── Styled HTML table helper ── */
+  .htbl { width:100%; border-collapse:collapse; font-family:'Segoe UI',Arial,sans-serif;
+          font-size:13px; border-radius:10px; overflow:hidden;
+          box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+  .htbl thead tr { background:#0C3C6E; }
+  .htbl thead th { padding:10px 14px; text-align:left; color:white !important;
+                   font-weight:600; white-space:nowrap; }
+  .htbl tbody tr:nth-child(even) { background:#F4F7FB; }
+  .htbl tbody tr:nth-child(odd)  { background:white; }
+  .htbl tbody td { padding:8px 14px; color:#1a1a1a !important;
+                   border-bottom:1px solid #EEF2F7; }
 
   header[data-testid="stHeader"]{ display:none; }
   .block-container{ padding-top:0 !important; padding-bottom:1rem !important; }
@@ -54,8 +68,8 @@ st.markdown("""
     display:flex; align-items:center; justify-content:center;
     font-size:24px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
   .banner-center{ flex:1; text-align:center; padding:0 16px; }
-  .banner-center h1{ color:white; font-size:20px; margin:0; font-weight:700; }
-  .banner-center p{ color:rgba(255,255,255,0.8); font-size:11px; margin:4px 0 0; }
+  .banner-center h1{ color:white !important; font-size:20px; margin:0; font-weight:700; letter-spacing:0.3px; }
+  .banner-center p{ color:rgba(255,255,255,0.88) !important; font-size:11px; margin:4px 0 0; }
   .badges{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; align-items:center; }
   .badge{ background:rgba(255,255,255,0.15); color:white; padding:3px 10px; border-radius:20px; font-size:10px; }
   .badge-funds{
@@ -222,13 +236,26 @@ def bcard(col, icon, label, val, color, src):
 
 BASE = dict(plot_bgcolor='white', paper_bgcolor='white',
             margin=dict(l=10,r=20,t=40,b=20),
-            font=dict(family='Segoe UI,Arial', size=12))
+            font=dict(family='Segoe UI,Arial', size=12, color='black'))
 
 def sip_fv(rate_pct, months):
     r = rate_pct / 100 / 12
     if r == 0:
         return 5000 * months
     return 5000 * (((1+r)**months - 1) / r) * (1+r)
+
+def html_table(data_dict):
+    """Render dict {col:[values]} as styled HTML table — white bg, navy header, black text."""
+    cols = list(data_dict.keys())
+    rows = list(zip(*[data_dict[c] for c in cols]))
+    h = '<div style="overflow-x:auto;margin-bottom:8px;">'
+    h += '<table class="htbl">'
+    h += '<thead><tr>' + ''.join(f'<th>{c}</th>' for c in cols) + '</tr></thead>'
+    h += '<tbody>'
+    for row in rows:
+        h += '<tr>' + ''.join(f'<td>{cell}</td>' for cell in row) + '</tr>'
+    h += '</tbody></table></div>'
+    return h
 
 # ─── TABS ─────────────────────────────────────────────────────────────────────
 tabs = st.tabs([
@@ -335,7 +362,7 @@ with tabs[1]:
     st.markdown('<div class="stitle">Return Metrics</div>', unsafe_allow_html=True)
     st.markdown('<div class="ssub">CAGR · Absolute Return · NAV Growth — Jan 2021 to Dec 2025</div>', unsafe_allow_html=True)
 
-    st.dataframe(pd.DataFrame({
+    st.markdown(html_table({
         'Fund': FUNDS,
         'Category': ['Large Cap','Small Cap','Hybrid','Flexi Cap','Debt','ELSS','Mid Cap','Gold'],
         'NAV Jan-21': [f'₹{v:,.2f}' for v in NAV_START],
@@ -343,7 +370,7 @@ with tabs[1]:
         'Total Return': [f'+{v:.1f}%' for v in TOTAL_RET],
         'CAGR (5Y)': [f'{v:.2f}%' for v in CAGRS],
         'vs Nifty 50': [f'+{v-14.5:.1f}% ✅' if v>=14.5 else f'{v-14.5:.1f}% ❌' for v in CAGRS],
-    }), use_container_width=True, hide_index=True)
+    }), unsafe_allow_html=True)
 
     sel_ret_funds = st.multiselect(
         "Select Funds to Compare (Nifty 50 always shown):",
@@ -373,13 +400,13 @@ with tabs[2]:
     st.markdown('<div class="stitle">Risk Metrics</div>', unsafe_allow_html=True)
     st.markdown('<div class="ssub">Standard Deviation · Maximum Drawdown | Jan 2021 – Dec 2025</div>', unsafe_allow_html=True)
 
-    st.dataframe(pd.DataFrame({
+    st.markdown(html_table({
         'Fund': FUNDS,
         'Ann. Std Dev': [f'{v:.1f}%' for v in STDS],
         'Max Drawdown': [f'{v:.2f}%' for v in DDS],
         'VaR 95%': [f'{v:.2f}%' for v in VAR95],
         'Risk Level': ['Moderate','High','Low','Moderate','Very Low','High','High','Moderate'],
-    }), use_container_width=True, hide_index=True)
+    }), unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
     with c1:
@@ -475,7 +502,7 @@ with tabs[3]:
                        xaxis_title='Alpha (%)', height=340,
                        margin=dict(l=10,r=70,t=40,b=20),
                        plot_bgcolor='white', paper_bgcolor='white',
-                       font=dict(family='Segoe UI,Arial', size=12))
+                       font=dict(family='Segoe UI,Arial', size=12, color='black'))
     st.plotly_chart(fig2, use_container_width=True)
 
 # ══════════════════ TAB 5 — BENCHMARK ══════════════════
@@ -524,17 +551,17 @@ with tabs[4]:
     fig.update_layout(title='CAGR vs All Benchmarks', xaxis_title='CAGR (%)',
                       height=520, margin=dict(l=10,r=70,t=40,b=20),
                       plot_bgcolor='white', paper_bgcolor='white',
-                      font=dict(family='Segoe UI,Arial', size=12))
+                      font=dict(family='Segoe UI,Arial', size=12, color='black'))
     st.plotly_chart(fig, use_container_width=True)
 
-    st.dataframe(pd.DataFrame({
+    st.markdown(html_table({
         'Fund / Instrument': FUNDS+['Nifty 50 Index','Gold (IBJA)','NSC India Post','Bank FD'],
         'CAGR': [f'{v:.2f}%' for v in CAGRS]+['14.50%','19.50%','7.70%','6.80%'],
         'vs Nifty 50 (14.5%)': [f'+{v-14.5:.1f}% ✅' if v>=14.5 else f'{v-14.5:.1f}% ❌' for v in CAGRS]+['—','+5.0% ✅','−6.8% ❌','−7.7% ❌'],
         'vs Bank FD (6.8%)':   [f'+{v-6.8:.1f}%' for v in CAGRS]+['+7.7%','+12.7%','+0.9%','—'],
         'vs CPI (5.5%)':       [f'+{v-5.5:.1f}%' for v in CAGRS]+['+9.0%','+14.0%','+2.2%','+1.3%'],
         'Beat Market?':        ['✅ Yes' if v>=14.5 else '❌ No' for v in CAGRS]+['Benchmark','✅ Yes','Fixed','Fixed'],
-    }), use_container_width=True, hide_index=True)
+    }), unsafe_allow_html=True)
 
 # ══════════════════ TAB 6 — SIP ══════════════════
 with tabs[5]:
@@ -591,15 +618,15 @@ with tabs[5]:
                     xanchor='right', x=1, font=dict(size=10)),
         margin=dict(l=10,r=20,t=60,b=20),
         plot_bgcolor='white', paper_bgcolor='white',
-        font=dict(family='Segoe UI,Arial', size=12))
+        font=dict(family='Segoe UI,Arial', size=12, color='black'))
     st.plotly_chart(fig, use_container_width=True)
 
-    st.dataframe(pd.DataFrame({
+    st.markdown(html_table({
         'Fund / Rate': [e[0] for e in sip_entries],
         'FV 5Y':  [f'₹{sip_fv(e[1],60)/1e5:.2f}L'  for e in sip_entries],
         'FV 10Y': [f'₹{sip_fv(e[1],120)/1e5:.2f}L' for e in sip_entries],
         'FV 15Y': [f'₹{sip_fv(e[1],180)/1e5:.2f}L' for e in sip_entries],
-    }), use_container_width=True, hide_index=True)
+    }), unsafe_allow_html=True)
 
 # ══════════════════ TAB 7 — CORRELATION ══════════════════
 with tabs[6]:
@@ -623,10 +650,11 @@ with tabs[6]:
     fig.update_layout(title='Pearson Correlation Heatmap — 8 Funds',
                       height=500, xaxis_tickangle=-30,
                       margin=dict(l=10,r=10,t=40,b=80),
-                      plot_bgcolor='white', paper_bgcolor='white')
+                      plot_bgcolor='white', paper_bgcolor='white',
+                      font=dict(family='Segoe UI,Arial', size=12, color='black'))
     st.plotly_chart(fig, use_container_width=True)
 
-    st.dataframe(pd.DataFrame({
+    st.markdown(html_table({
         'Finding': ['Highest Equity Correlation','Gold as Portfolio Hedge',
                     'Debt Uncorrelated','Mid + Small Cap Pair','Best Diversified Pair'],
         'Fund Pair': ['HDFC Balanced ↔ HDFC Flexi Cap','Nippon Gold ↔ All Equity Funds',
@@ -640,7 +668,7 @@ with tabs[6]:
             'Both growth-oriented — high co-movement in bull & bear markets',
             'Highest return fund + best natural hedge = optimal core pair',
         ],
-    }), use_container_width=True, hide_index=True)
+    }), unsafe_allow_html=True)
 
 # ══════════════════ TAB 8 — SCORECARD ══════════════════
 with tabs[7]:
@@ -657,12 +685,30 @@ with tabs[7]:
         ('#7',   'Mirae Large Cap',   58,13.93,0.63,-14.97,'Low-risk Equity',      '★★☆☆☆'),
         ('#8',   'HDFC Money Market', 20, 6.10,-0.73,  0.0,'Capital Preservation','★☆☆☆☆'),
     ]
-    sc_df = pd.DataFrame(sc_data,
-                         columns=['Rank','Fund','Score /100','CAGR','Sharpe','Max DD','Best For','Rating'])
-    sc_df['CAGR']   = sc_df['CAGR'].apply(lambda x: f'{x:.2f}%')
-    sc_df['Sharpe'] = sc_df['Sharpe'].apply(lambda x: f'{x:.2f}')
-    sc_df['Max DD'] = sc_df['Max DD'].apply(lambda x: f'{x:.2f}%')
-    st.dataframe(sc_df, use_container_width=True, hide_index=True)
+    # Styled HTML table matching Risk-Adjusted tab style
+    STAR_COLORS_SC = {5:'#1D9E75', 4:'#27AE60', 3:'#E67E22', 2:'#E24B4A', 1:'#922B21'}
+    sc_tbl  = '<table class="htbl">'
+    sc_tbl += '<thead><tr>'
+    for h in ['Rank','Fund','Score /100','CAGR (5Y)','Sharpe','Max DD','Best For','Rating']:
+        sc_tbl += f'<th>{h}</th>'
+    sc_tbl += '</tr></thead><tbody>'
+    for idx, row in enumerate(sc_data):
+        rank, fund, score, cagr, sharpe, maxdd, bestfor, rating = row
+        sc = STAR_COLORS_SC.get(rating.count('★'), '#888')
+        bg = '#F4F7FB' if idx % 2 == 0 else 'white'
+        sc_tbl += f'<tr style="background:{bg};">'
+        sc_tbl += f'<td style="padding:9px 14px;color:#1a1a1a;">{rank}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;font-weight:600;color:#0C3C6E;">{fund}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;font-weight:700;color:#0C3C6E;">{score}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:#1a1a1a;">{cagr:.2f}%</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:#1a1a1a;">{sharpe:.2f}</td>'
+        dd_c = '#E24B4A' if maxdd < -15 else '#E67E22' if maxdd < -9 else '#1D9E75'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:{dd_c};font-weight:600;">{maxdd:.2f}%</td>'
+        sc_tbl += f'<td style="padding:9px 14px;color:#3A4D63;">{bestfor}</td>'
+        sc_tbl += f'<td style="padding:9px 14px;text-align:center;color:{sc};font-size:17px;">{rating}</td>'
+        sc_tbl += '</tr>'
+    sc_tbl += '</tbody></table>'
+    st.markdown(f'<div style="overflow-x:auto;margin-bottom:8px;">{sc_tbl}</div>', unsafe_allow_html=True)
 
     # ── 2×2 Investor Profile Matrix ──────────────────────────────────────────
     st.markdown("### 👤 Investor Profile Recommendations")
@@ -734,7 +780,8 @@ with tabs[8]:
 
         if summary_rows:
             st.markdown("**📊 Summary for Selected Period**")
-            st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+            sdf = pd.DataFrame(summary_rows)
+            st.markdown(html_table({c: list(sdf[c]) for c in sdf.columns}), unsafe_allow_html=True)
 
         # ── Daily NAV Table with Indexed & % Return columns ──
         st.markdown("---")
