@@ -171,45 +171,22 @@ MKT_STD   = 14.0  # Nifty 50 approximate annual std dev (%)
 _NM = [0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,59]
 NIFTY_INDEXED = [round(100*(1.145)**(m/12),1) for m in _NM]
 
-# ─── LOAD REAL NAV DATA ───────────────────────────────────────────────────────
-# Use abspath so the path is always correct regardless of where Streamlit is launched from
-_APP_DIR   = os.path.dirname(os.path.abspath(__file__))
-NAV_FOLDER = os.path.abspath(os.path.join(_APP_DIR, '..', '06_NAV_Data'))
-NAV_FILES  = {
-    'Mirae Large Cap'   : 'NAV_2021-01-01_to_2025-12-30  mirae asset large cap fund.xlsx',
-    'Bandhan Small Cap' : 'NAV_2021-01-01_to_2025-12-30 Bandhan small cap Fund.xlsx',
-    'HDFC Balanced Adv' : 'NAV_2021-01-01_to_2025-12-30 HDFC Balanced Advantage Fund.xlsx',
-    'HDFC Flexi Cap'    : 'NAV_2021-01-01_to_2025-12-30 HDFC Flexi cap.xlsx',
-    'HDFC Money Market' : 'NAV_2021-01-01_to_2025-12-30 HDFC Money Market Fund.xlsx',
-    'ICICI ELSS'        : 'NAV_2021-01-01_to_2025-12-30 ICICI Prudential ELSS Tax Saver Fund.xlsx',
-    'Kotak Midcap'      : 'NAV_2021-01-01_to_2025-12-30 Kotak Midcap fund.xlsx',
-    'Nippon Gold ETF'   : 'NAV_2021-01-01_to_2025-12-30 Nippon India ETF Gold BeES.xlsx',
-}
+# ─── LOAD NAV DATA FROM EMBEDDED MODULE ─────────────────────────────────────
+# Data is pre-loaded in nav_data.py so the app works on Streamlit Cloud
+# without needing the 06_NAV_Data Excel files at runtime.
+from nav_data import NAV_DATA
 
 @st.cache_data
-def load_nav_data(_folder: str):
-    """Load all NAV Excel files. Takes folder as argument so cache resets if path changes."""
+def load_nav_data():
+    """Convert embedded NAV_DATA dict → dict of DataFrames."""
     result = {}
-    for fund, fname in NAV_FILES.items():
-        path = os.path.join(_folder, fname)
-        try:
-            df = pd.read_excel(path, header=4)
-            df.columns = ['NAV','Repurchase','Sale','Date']
-            df = df[['Date','NAV']].dropna()
-            df['NAV']  = pd.to_numeric(df['NAV'],  errors='coerce')
-            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-            df = df.dropna().sort_values('Date').reset_index(drop=True)
-            result[fund] = df
-        except Exception as e:
-            result[fund] = None
+    for fund, d in NAV_DATA.items():
+        df = pd.DataFrame({'Date': pd.to_datetime(d['dates']),
+                           'NAV':  d['navs']})
+        result[fund] = df
     return result
 
-nav_raw = load_nav_data(NAV_FOLDER)
-
-# Quick sanity check — show warning only if files failed to load
-_failed = [f for f, df in nav_raw.items() if df is None or df.empty]
-if _failed:
-    st.error(f"⚠️ Could not load NAV files for: {', '.join(_failed)}\n\nLooked in: `{NAV_FOLDER}`")
+nav_raw = load_nav_data()
 
 # ─── COMPUTE METRICS FROM REAL NAV DATA ───────────────────────────────────────
 BEST_FOR = {
