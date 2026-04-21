@@ -172,7 +172,9 @@ _NM = [0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,59]
 NIFTY_INDEXED = [round(100*(1.145)**(m/12),1) for m in _NM]
 
 # ─── LOAD REAL NAV DATA ───────────────────────────────────────────────────────
-NAV_FOLDER = os.path.join(os.path.dirname(__file__), '..', '06_NAV_Data')
+# Use abspath so the path is always correct regardless of where Streamlit is launched from
+_APP_DIR   = os.path.dirname(os.path.abspath(__file__))
+NAV_FOLDER = os.path.abspath(os.path.join(_APP_DIR, '..', '06_NAV_Data'))
 NAV_FILES  = {
     'Mirae Large Cap'   : 'NAV_2021-01-01_to_2025-12-30  mirae asset large cap fund.xlsx',
     'Bandhan Small Cap' : 'NAV_2021-01-01_to_2025-12-30 Bandhan small cap Fund.xlsx',
@@ -185,22 +187,29 @@ NAV_FILES  = {
 }
 
 @st.cache_data
-def load_nav_data():
+def load_nav_data(_folder: str):
+    """Load all NAV Excel files. Takes folder as argument so cache resets if path changes."""
     result = {}
     for fund, fname in NAV_FILES.items():
-        path = os.path.join(NAV_FOLDER, fname)
+        path = os.path.join(_folder, fname)
         try:
             df = pd.read_excel(path, header=4)
             df.columns = ['NAV','Repurchase','Sale','Date']
             df = df[['Date','NAV']].dropna()
-            df['Date'] = pd.to_datetime(df['Date'])
-            df = df.sort_values('Date').reset_index(drop=True)
+            df['NAV']  = pd.to_numeric(df['NAV'],  errors='coerce')
+            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+            df = df.dropna().sort_values('Date').reset_index(drop=True)
             result[fund] = df
-        except Exception:
+        except Exception as e:
             result[fund] = None
     return result
 
-nav_raw = load_nav_data()
+nav_raw = load_nav_data(NAV_FOLDER)
+
+# Quick sanity check — show warning only if files failed to load
+_failed = [f for f, df in nav_raw.items() if df is None or df.empty]
+if _failed:
+    st.error(f"⚠️ Could not load NAV files for: {', '.join(_failed)}\n\nLooked in: `{NAV_FOLDER}`")
 
 # ─── COMPUTE METRICS FROM REAL NAV DATA ───────────────────────────────────────
 BEST_FOR = {
@@ -214,9 +223,10 @@ BEST_FOR = {
     'Nippon Gold ETF':    'Portfolio Hedge',
 }
 
-@st.cache_data
-def compute_metrics(_nav_raw):
-    """Compute all financial metrics from real NAV Excel data."""
+@st.cache_data(show_spinner="📊 Computing financial metrics from real NAV data…")
+def compute_metrics(_nav_raw, _version=3):
+    """Compute all financial metrics from real NAV Excel data.
+    _version bump forces cache invalidation when function logic changes."""
     from math import sqrt
 
     cagrs, stds, dds, sharpes, sortinos, alphas, var95 = [], [], [], [], [], [], []
