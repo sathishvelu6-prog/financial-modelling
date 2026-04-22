@@ -53,10 +53,23 @@ st.markdown("""
   [data-testid="stMultiSelect"] [data-baseweb="select"],
   [data-baseweb="select"] { background-color: white !important; }
   [data-baseweb="select"] * { color: #1a1a1a !important; }
-  [data-baseweb="popover"] { background: white !important; }
-  [data-baseweb="menu"] { background: white !important; }
+  /* Dropdown popup list — force white background + dark text */
+  [data-baseweb="popover"],
+  [data-baseweb="popover"] *,
+  [data-baseweb="menu"],
+  [data-baseweb="menu"] * { background-color: white !important; color: #1a1a1a !important; }
+  /* Each option row on hover */
+  [role="option"]:hover { background-color: #EEF4FB !important; }
+  [role="option"] { background-color: white !important; color: #1a1a1a !important; }
+  /* "Select all" row */
+  [data-baseweb="menu"] li { background-color: white !important; color: #1a1a1a !important; }
+  /* Selected chips */
   [data-baseweb="tag"] { background-color: #EEEDFE !important; }
   [data-baseweb="tag"] span { color: #534AB7 !important; }
+  /* ── Fix Plotly hover tooltip ── */
+  .hoverlayer .hovertext rect { fill: white !important; stroke: #D8E4F0 !important; }
+  .hoverlayer .hovertext text  { fill: #1a1a1a !important; }
+  .hoverlayer .hovertext path  { fill: white !important; stroke: #D8E4F0 !important; }
   /* ── Styled HTML table helper ── */
   .htbl { width:100%; border-collapse:collapse; font-family:'Segoe UI',Arial,sans-serif;
           font-size:13px; border-radius:10px; overflow:hidden;
@@ -200,10 +213,8 @@ BEST_FOR = {
     'Nippon Gold ETF':    'Portfolio Hedge',
 }
 
-@st.cache_data(show_spinner="📊 Computing financial metrics from real NAV data…")
-def compute_metrics(_nav_raw, _version=3):
-    """Compute all financial metrics from real NAV Excel data.
-    _version bump forces cache invalidation when function logic changes."""
+def compute_metrics(nav_raw):
+    """Compute all financial metrics directly from NAV data — no caching."""
     from math import sqrt
 
     cagrs, stds, dds, sharpes, sortinos, alphas, var95 = [], [], [], [], [], [], []
@@ -217,7 +228,7 @@ def compute_metrics(_nav_raw, _version=3):
     snap_dates = [base_dt + pd.DateOffset(months=m) for m in _NM_pts]
 
     for fund in FUNDS:
-        df = _nav_raw.get(fund)
+        df = nav_raw.get(fund)
         empty = (df is None or df.empty)
 
         if not empty:
@@ -335,7 +346,8 @@ def compute_metrics(_nav_raw, _version=3):
         SCORES=scores,  RATINGS=ratings,
     )
 
-m = compute_metrics(nav_raw)
+with st.spinner("📊 Computing financial metrics from real NAV data…"):
+    m = compute_metrics(nav_raw)
 CAGRS       = m['CAGRS']
 STDS        = m['STDS']
 DDS         = m['DDS']
