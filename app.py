@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import os
+import os, base64
+
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -48,10 +50,16 @@ st.markdown("""
   .js-plotly-plot .plotly svg text { fill: #111111 !important; }
   .js-plotly-plot .plotly .g-gtitle text { fill: #0C3C6E !important; }
   .js-plotly-plot .plotly .xtitle, .js-plotly-plot .plotly .ytitle { fill: #111111 !important; }
-  /* ── Fix dark selectbox / multiselect ── */
-  [data-testid="stSelectbox"] [data-baseweb="select"],
-  [data-testid="stMultiSelect"] [data-baseweb="select"],
-  [data-baseweb="select"] { background-color: white !important; }
+  /* ── Fix dark selectbox / multiselect — all states ── */
+  [data-testid="stSelectbox"],
+  [data-testid="stMultiSelect"] { background-color: white !important; }
+  [data-testid="stSelectbox"] > div,
+  [data-testid="stSelectbox"] > div > div,
+  [data-testid="stMultiSelect"] > div,
+  [data-testid="stMultiSelect"] > div > div { background-color: white !important; }
+  [data-baseweb="select"],
+  [data-baseweb="select"] > div { background-color: white !important; color: #1a1a1a !important; }
+  [data-baseweb="select"] input { color: #1a1a1a !important; background: white !important; }
   [data-baseweb="select"] * { color: #1a1a1a !important; }
   /* Dropdown popup list — force white background + dark text */
   [data-baseweb="popover"],
@@ -84,6 +92,15 @@ st.markdown("""
 
   header[data-testid="stHeader"]{ display:none; }
   .block-container{ padding-top:0 !important; padding-bottom:1rem !important; }
+  /* ── Sticky tab navigation bar ── */
+  [data-testid="stTabs"] > div:first-child {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 998 !important;
+    background-color: #F4F7FB !important;
+    padding: 6px 0 0 !important;
+    box-shadow: 0 2px 8px rgba(12,60,110,0.12) !important;
+  }
   .banner{
     background:linear-gradient(135deg,#0C3C6E 0%,#1A6DB5 100%);
     padding:14px 28px; display:flex; align-items:center; justify-content:space-between;
@@ -140,9 +157,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── Banner ───────────────────────────────────────────────────────────────────
-st.markdown("""
+# Load Salesqueen logo — save salesqueen_logo.png in the same folder as app.py
+_logo_path = os.path.join(_APP_DIR, 'salesqueen_logo.png')
+if os.path.isfile(_logo_path):
+    with open(_logo_path, 'rb') as _f:
+        _logo_b64 = base64.b64encode(_f.read()).decode()
+    _logo_html = (f'<div class="banner-logo" style="padding:2px;background:white;">'
+                  f'<img src="data:image/png;base64,{_logo_b64}" '
+                  f'style="width:48px;height:48px;object-fit:contain;border-radius:50%;display:block;">'
+                  f'</div>')
+else:
+    _logo_html = '<div class="banner-logo">🏛️</div>'
+
+st.markdown(f"""
 <div class="banner">
-  <div class="banner-logo">🏛️</div>
+  {_logo_html}
   <div class="banner-center">
     <h1>Financial Modelling of Mutual Fund Returns</h1>
     <p>A Data-Driven Approach to Convert Potential Investors into Consistent Wealth Builders</p>
@@ -539,9 +568,11 @@ with tabs[1]:
                   annotation_text='Base = 100')
     fig.update_layout(
         title='NAV Growth — Indexed to 100 at Jan 2021 (vs Nifty 50 Benchmark)',
-        xaxis_title='Period', yaxis_title='Indexed NAV', height=440,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-        **BASE)
+        xaxis_title='Period', yaxis_title='Indexed NAV', height=480,
+        legend=dict(orientation='h', yanchor='top', y=-0.18, xanchor='left', x=0,
+                    font=dict(size=11)),
+        margin=dict(l=10, r=20, t=50, b=120),
+        **{k: v for k, v in BASE.items() if k != 'margin'})
     st.plotly_chart(fig, use_container_width=True)
 
 # ══════════════════ TAB 3 — RISK ══════════════════
@@ -767,10 +798,10 @@ with tabs[5]:
     fig.update_layout(
         title=f'₹5,000/month SIP — Wealth Growth Over Time ({horizon})',
         xaxis_title=f'Months (1 – {hm})', yaxis_title='Corpus Value (₹ Lakhs)',
-        height=520,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02,
-                    xanchor='right', x=1, font=dict(size=10)),
-        margin=dict(l=10,r=20,t=60,b=20),
+        height=560,
+        legend=dict(orientation='h', yanchor='top', y=-0.22,
+                    xanchor='left', x=0, font=dict(size=10)),
+        margin=dict(l=10, r=20, t=50, b=140),
         plot_bgcolor='white', paper_bgcolor='white',
         font=dict(family='Segoe UI,Arial', size=12, color='black'))
     st.plotly_chart(fig, use_container_width=True)
