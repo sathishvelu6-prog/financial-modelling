@@ -111,8 +111,8 @@ st.markdown("""
     display:flex; align-items:center; justify-content:center;
     font-size:36px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
   .banner-center{ flex:1; text-align:center; padding:0 20px; }
-  .banner-center h1{ color:white !important; font-size:22px; margin:0; font-weight:700; letter-spacing:0.3px; }
-  .banner-center p{ color:rgba(255,255,255,0.88) !important; font-size:12px; margin:6px 0 10px; }
+  .banner-center h1{ color:#FFD700 !important; font-size:22px; margin:0; font-weight:700; letter-spacing:0.3px; font-family:'Times New Roman',Times,serif; }
+  .banner-center p{ color:#FFA500 !important; font-size:12px; margin:6px 0 10px; font-family:'Times New Roman',Times,serif; }
   .badges{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; align-items:center; }
   .badge{ background:rgba(255,255,255,0.15); color:white; padding:3px 10px; border-radius:20px; font-size:10px; }
   .badge-funds{
