@@ -103,17 +103,17 @@ st.markdown("""
   }
   .banner{
     background:linear-gradient(135deg,#0C3C6E 0%,#1A6DB5 100%);
-    padding:14px 28px; display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px; display:flex; align-items:center;
     border-radius:0 0 12px 12px; margin-bottom:16px;
     box-shadow:0 4px 16px rgba(12,60,110,0.3);
   }
-  .banner-logo{ background:white; border-radius:50%; width:52px; height:52px;
+  .banner-logo{ background:white; border-radius:50%; width:90px; height:90px;
     display:flex; align-items:center; justify-content:center;
-    font-size:24px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
-  .banner-center{ flex:1; text-align:center; padding:0 16px; }
-  .banner-center h1{ color:white !important; font-size:20px; margin:0; font-weight:700; letter-spacing:0.3px; }
-  .banner-center p{ color:rgba(255,255,255,0.88) !important; font-size:11px; margin:4px 0 0; }
-  .badges{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; align-items:center; }
+    font-size:36px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+  .banner-center{ flex:1; text-align:center; padding:0 20px; }
+  .banner-center h1{ color:white !important; font-size:22px; margin:0; font-weight:700; letter-spacing:0.3px; }
+  .banner-center p{ color:rgba(255,255,255,0.88) !important; font-size:12px; margin:6px 0 10px; }
+  .badges{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; align-items:center; }
   .badge{ background:rgba(255,255,255,0.15); color:white; padding:3px 10px; border-radius:20px; font-size:10px; }
   .badge-funds{
     background:#EEEDFE; color:#534AB7; padding:4px 12px; border-radius:20px;
@@ -162,9 +162,9 @@ _logo_path = os.path.join(_APP_DIR, 'salesqueen_logo.png')
 if os.path.isfile(_logo_path):
     with open(_logo_path, 'rb') as _f:
         _logo_b64 = base64.b64encode(_f.read()).decode()
-    _logo_html = (f'<div class="banner-logo" style="padding:2px;background:white;">'
+    _logo_html = (f'<div class="banner-logo" style="padding:4px;background:white;">'
                   f'<img src="data:image/png;base64,{_logo_b64}" '
-                  f'style="width:48px;height:48px;object-fit:contain;border-radius:50%;display:block;">'
+                  f'style="width:82px;height:82px;object-fit:contain;border-radius:50%;display:block;">'
                   f'</div>')
 else:
     _logo_html = '<div class="banner-logo">🏛️</div>'
@@ -175,24 +175,24 @@ st.markdown(f"""
   <div class="banner-center">
     <h1>Financial Modelling of Mutual Fund Returns</h1>
     <p>A Data-Driven Approach to Convert Potential Investors into Consistent Wealth Builders</p>
-  </div>
-  <div class="badges">
-    <span class="badge-funds">📊 8 Mutual Funds
-      <div class="tip">
-        1. Mirae Asset Large Cap Fund<br>
-        2. Bandhan Small Cap Fund<br>
-        3. HDFC Balanced Advantage Fund<br>
-        4. HDFC Flexi Cap Fund<br>
-        5. HDFC Money Market Fund<br>
-        6. ICICI Prudential ELSS Tax Saver<br>
-        7. Kotak Midcap Fund<br>
-        8. Nippon India ETF Gold BeES
-      </div>
-    </span>
-    <span class="badge">📅 Jan 2021 – Dec 2025</span>
-    <span class="badge">🧮 8 Financial Models</span>
-    <span class="badge">🏢 Salesqueen Software Solutions</span>
-    <span class="badge">📍 Chennai, India</span>
+    <div class="badges">
+      <span class="badge-funds">📊 8 Mutual Funds
+        <div class="tip">
+          1. Mirae Asset Large Cap Fund<br>
+          2. Bandhan Small Cap Fund<br>
+          3. HDFC Balanced Advantage Fund<br>
+          4. HDFC Flexi Cap Fund<br>
+          5. HDFC Money Market Fund<br>
+          6. ICICI Prudential ELSS Tax Saver<br>
+          7. Kotak Midcap Fund<br>
+          8. Nippon India ETF Gold BeES
+        </div>
+      </span>
+      <span class="badge">📅 Jan 2021 – Dec 2025</span>
+      <span class="badge">🧮 8 Financial Models</span>
+      <span class="badge">🏢 Salesqueen Software Solutions</span>
+      <span class="badge">📍 Chennai, India</span>
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
