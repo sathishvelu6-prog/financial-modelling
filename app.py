@@ -171,8 +171,8 @@ st.markdown(f"""
 <div class="banner">
   {_logo_html}
   <div class="banner-center">
-    <h1>Financial Modelling of Mutual Fund Returns</h1>
-    <p>A Data-Driven Approach to Convert Potential Investors into Consistent Wealth Builders</p>
+    <div style="color:#FFD700;font-size:22px;font-weight:700;letter-spacing:0.3px;font-family:'Times New Roman',Times,serif;margin:0;">Financial Modelling of Mutual Fund Returns</div>
+    <div style="color:#FFA500;font-size:12px;font-family:'Times New Roman',Times,serif;margin:6px 0 10px;">A Data-Driven Approach to Convert Potential Investors into Consistent Wealth Builders</div>
     <div class="badges">
       <span class="badge">📊 8 Mutual Funds</span>
       <span class="badge">📅 Jan 2021 – Dec 2025</span>
