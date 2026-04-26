@@ -41,9 +41,7 @@ st.markdown("""
   p, span, label { color: #1a1a1a; }
   div { color: #1a1a1a; }
   h2,h3,h4 { color: #0C3C6E !important; }
-  /* Banner title must stay white — override generic rules */
-  .banner-center h1 { color: white !important; }
-  .banner-center p  { color: rgba(255,255,255,0.85) !important; }
+  /* Banner title colours set in banner section below */
   /* Selectbox / multiselect */
   [data-baseweb="select"] { background:white !important; }
   /* ── Force Plotly chart SVG text to black ── */
@@ -176,18 +174,7 @@ st.markdown(f"""
     <h1>Financial Modelling of Mutual Fund Returns</h1>
     <p>A Data-Driven Approach to Convert Potential Investors into Consistent Wealth Builders</p>
     <div class="badges">
-      <span class="badge-funds">📊 8 Mutual Funds
-        <div class="tip">
-          1. Mirae Asset Large Cap Fund<br>
-          2. Bandhan Small Cap Fund<br>
-          3. HDFC Balanced Advantage Fund<br>
-          4. HDFC Flexi Cap Fund<br>
-          5. HDFC Money Market Fund<br>
-          6. ICICI Prudential ELSS Tax Saver<br>
-          7. Kotak Midcap Fund<br>
-          8. Nippon India ETF Gold BeES
-        </div>
-      </span>
+      <span class="badge">📊 8 Mutual Funds</span>
       <span class="badge">📅 Jan 2021 – Dec 2025</span>
       <span class="badge">🧮 8 Financial Models</span>
       <span class="badge">🏢 Salesqueen Software Solutions</span>
